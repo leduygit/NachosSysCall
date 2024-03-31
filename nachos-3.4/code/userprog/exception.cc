@@ -117,15 +117,18 @@ ExceptionHandler(ExceptionType which)
 	        }
 	    break;
 	case PageFaultException:
+	    DEBUG('a', "Unexpected user mode exception PageFaultException\n");
 	    printf("Unexpected user mode exception PageFaultException\n");
 	    interrupt->Halt();
             break;
     	case ReadOnlyException:
-            printf("Unexpected user mode exception ReadOnlyException\n");
+            DEBUG('a', "Unexpected user mode exception ReadOnlyException\n");
+	    printf("Unexpected user mode exception ReadOnlyException\n");
             interrupt->Halt();
             break;
     	case BusErrorException:
-            printf("Unexpected user mode exception BusErrorException\n");
+            DEBUG('a', "Unexpected user mode exception BusErrorException\n");
+	    printf("Unexpected user mode exception BusErrorException\n");
             interrupt->Halt();
             break;
     	case AddressErrorException:
@@ -133,19 +136,23 @@ ExceptionHandler(ExceptionType which)
             interrupt->Halt();
             break;
     	case OverflowException:
+	    DEBUG('a', "Unexpected user mode exception OverflowException\n");
             printf("Unexpected user mode exception OverflowException\n");
             interrupt->Halt();
             break;
    	case IllegalInstrException:
-            printf("Unexpected user mode exception IllegalInstrException\n");
+            DEBUG('a', "Unexpected user mode exception IllegalInstrException\n");
+	    printf("Unexpected user mode exception IllegalInstrException\n");
             interrupt->Halt();
             break;
     	case NumExceptionTypes:
-            printf("Unexpected user mode exception NumExceptionTypes\n");
+            DEBUG('a', "Unexpected user mode exception NumExceptionTypes\n");
+	    printf("Unexpected user mode exception NumExceptionTypes\n");
             interrupt->Halt();
             break;
     	default:
-            printf("\n Unexpected user mode exception (%d %d)", which, type);
+            DEBUG('a', "Unexpected user mode exception (%d %d)\n", which, type);
+	    printf("\n Unexpected user mode exception (%d %d)", which, type);
             interrupt->Halt();
     }
     
