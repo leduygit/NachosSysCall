@@ -29,6 +29,10 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
+#define SC_ReadChar	15
+#define SC_PrintChar	16
+#define SC_ReadString	17
+#define SC_PrintString	18
 
 #ifndef IN_ASM
 
@@ -41,6 +45,11 @@
  * are then invoked in the Nachos kernel, after appropriate error checking, 
  * from the system call entry point in exception.cc.
  */
+
+char ReadChar();
+void PrintChar(char character);
+void ReadString(char *buffer, int size);
+void PrintString(char *buffer);
 
 /* Stop Nachos, and print out performance stats */
 void Halt();		

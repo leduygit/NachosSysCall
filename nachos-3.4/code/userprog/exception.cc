@@ -78,10 +78,43 @@ ExceptionHandler(ExceptionType which)
             	case SC_Halt:
             	    ExceptionHandlerHalt();
             	    break;
-		case SC_Open: //...
-		default:
-		    IncreasePC();
-	    }
+                case SC_ReadChar:
+                    int maxBytes, readBytes;
+                    char* buffer;
+                    maxBytes = 255;
+                    buffer = new char[maxBytes];
+                    readBytes = syncCons->Read(buffer, maxBytes);
+                    if (readBytes > 1)
+                    {
+                        printf("Error: Read more than one character\n");
+                        DEBUG('a', "Error: Read more than one character\n");
+                        interrupt->Halt();
+                    }
+                    else if (readBytes == 0)
+                    {
+                        printf("Error: Read zero characters\n");
+                        DEBUG('a', "Error: Read zero characters\n");
+                        interrupt->Halt();
+                    }
+                    else
+                    {
+                        machine->WriteRegister(2, buffer[0]);
+                    }
+                    delete[] buffer;
+                    DEBUG('a', "SyscallException: SC_ReadChar\n");
+                    IncreasePC();
+                    break;
+                case SC_PrintChar:
+                    char ch;
+                    ch = (char)machine->ReadRegister(4);
+                    syncCons->Write(&ch, 1);
+                    DEBUG('a', "SyscallException: SC_PrintChar\n");
+                    IncreasePC();
+                    break;
+                default:
+                    IncreasePC();
+                    break;
+	        }
 	    break;
 	case PageFaultException:
 	    printf("Unexpected user mode exception PageFaultException\n");
