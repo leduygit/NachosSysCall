@@ -152,6 +152,7 @@ void ExceptionHandler(ExceptionType which)
                 machine->WriteRegister(2, buffer[0]);
             }
             delete[] buffer;
+            //printf("Error: Read string failed\n");
             DEBUG('a', "SyscallException: SC_ReadChar\n");
             IncreasePC();
             break;
@@ -243,16 +244,5 @@ void ExceptionHandler(ExceptionType which)
         DEBUG('a', "Unexpected user mode exception (%d %d)\n", which, type);
         printf("\n Unexpected user mode exception (%d %d)", which, type);
         interrupt->Halt();
-    }
-
-    if ((which == SyscallException) && (type == SC_Halt))
-    {
-        DEBUG('a', "Shutdown, initiated by user program.\n");
-        interrupt->Halt();
-    }
-    else
-    {
-        printf("Unexpected user mode exception %d %d\n", which, type);
-        ASSERT(FALSE);
     }
 }
