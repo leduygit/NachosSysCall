@@ -148,10 +148,10 @@ FileSystem::FileSystem(bool format)
 	{
 		openf[i] = NULL;
 	}
-	/*openf[index++] = this->Open("stdin", 2);
+	openf[index++] = this->Open("stdin", 2);
 	openf[index++] = this->Open("stdout", 3);
 	this->Create("stdin", 0);
-	this->Create("stdout", 0);*/
+	this->Create("stdout", 0);
 }
 
 //----------------------------------------------------------------------

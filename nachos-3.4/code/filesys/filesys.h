@@ -59,10 +59,10 @@ class FileSystem {
 		{
 			openf[i] = NULL;
 		}
-		/*this->Create("stdin", 0);
+		this->Create("stdin", 0);
 		this->Create("stdout", 0);
 		openf[index++] = this->Open("stdin", 2);
-		openf[index++] = this->Open("stdout", 3);    */
+		openf[index++] = this->Open("stdout", 3);
 	}
 	
 

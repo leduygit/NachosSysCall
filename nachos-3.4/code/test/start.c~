@@ -129,7 +129,7 @@ Yield:
 	syscall
 	j	$31
 	.end Yield
-
+	
 	.globl ReadChar
 	.ent	ReadChar
 ReadChar:
@@ -161,6 +161,15 @@ PrintString:
 	syscall
 	j	$31
 	.end PrintString
+
+/* dummy function to keep gcc happy */
+        .globl  test
+        .ent    test
+test:
+	addiu $2,$0,SC_test
+	syscall
+	j	$31
+	.end test
 
 /* dummy function to keep gcc happy */
         .globl  __main
