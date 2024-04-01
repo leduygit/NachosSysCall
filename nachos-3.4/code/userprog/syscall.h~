@@ -29,8 +29,14 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
+#define SC_ReadChar	15
+#define SC_PrintChar	16
+#define SC_ReadString	17
+#define SC_PrintString	18
 
 #ifndef IN_ASM
+
+void test();
 
 /* The system call interface.  These are the operations the Nachos
  * kernel needs to support, to be able to run user programs.
@@ -41,6 +47,11 @@
  * are then invoked in the Nachos kernel, after appropriate error checking, 
  * from the system call entry point in exception.cc.
  */
+
+char ReadChar();
+void PrintChar(char character);
+void ReadString(char *buffer, int size);
+void PrintString(char *buffer);
 
 /* Stop Nachos, and print out performance stats */
 void Halt();		
@@ -92,7 +103,7 @@ int Create(char *name);
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
  */
-OpenFileId Open(char *name);
+OpenFileId Open(char *name, int type);
 
 /* Write "size" bytes from "buffer" to the open file. */
 int Write(char *buffer, int size, OpenFileId id);
