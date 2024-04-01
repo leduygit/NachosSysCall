@@ -48,13 +48,7 @@ const int MaxFileLength = 32;
 //
 //	"which" is the kind of exception.  The list of possible exceptions
 //	are in machine.h.
-
-void ExceptionHandlerHalt()
-{
-    DEBUG('a', "\n Shutdown, initiated by user program");
-    printf("\n Shutdown, initiated by user program .");
-    interrupt->Halt();
-}
+//----------------------------------------------------------------------
 
 void IncreasePC()
 {
@@ -62,6 +56,13 @@ void IncreasePC()
     machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
     machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
     machine->WriteRegister(NextPCReg, pcAfter);
+}
+
+void ExceptionHandlerHalt()
+{
+    DEBUG('a', "\n Shutdown, initiated by user program.");
+    printf("\n Shutdown, initiated by user program.");
+    interrupt->Halt();
 }
 
 char* User2System(int virtAddr, int limit) 
@@ -282,6 +283,91 @@ void write2File() {
 
 //----------------------------------------------------------------------
 
+
+void ReadCharHandler()
+{
+    int maxBytes, readBytes;
+    char *buffer;
+    maxBytes = 255;
+    buffer = new char[maxBytes];
+    readBytes = syncCons->Read(buffer, maxBytes);
+    if (readBytes > 1)
+    {
+        printf("Error: Read more than one character\n");
+        DEBUG('a', "Error: Read more than one character\n");
+        interrupt->Halt();
+    }
+    else if (readBytes == 0)
+    {
+        printf("Error: Read zero characters\n");
+        DEBUG('a', "Error: Read zero characters\n");
+        interrupt->Halt();
+    }
+    else
+    {
+        machine->WriteRegister(2, buffer[0]);
+    }
+    delete[] buffer;
+    // printf("Error: Read string failed\n");
+    DEBUG('a', "SyscallException: SC_ReadChar\n");
+    //IncreasePC();
+}
+
+void ReadStringHandler()
+{
+    int virtAddr, length;
+    virtAddr = machine->ReadRegister(4);
+    length = machine->ReadRegister(5);
+    char *str;
+    str = new char[length];
+    syncCons->Read(str, length);
+    if (length < 0)
+    {
+        // printf("Error: Read string failed\n");
+        // DEBUG('a', "Error: Read string failed\n");
+        interrupt->Halt();
+    }
+    else
+    {
+        System2User(virtAddr, length, str);
+    }
+    delete[] str;
+    //IncreasePC();
+}
+
+void PrintCharHandler()
+{
+    char ch;
+    ch = (char)machine->ReadRegister(4);
+    syncCons->Write(&ch, 1);
+    DEBUG('a', "SyscallException: SC_PrintChar\n");
+    //IncreasePC();
+}
+
+void PrintStringHandler()
+{
+    int virtAddrStr, maxBytes;
+    maxBytes = 255;
+    virtAddrStr = machine->ReadRegister(4);
+    char *strPrint;
+    strPrint = User2System(virtAddrStr, maxBytes);
+    if (strPrint == NULL)
+    {
+        // printf("Error: Print string failed\n");
+        // DEBUG('a', "Error: Print string failed\n");
+        interrupt->Halt();
+    }
+    else
+    {
+        syncCons->Write(strPrint, strlen(strPrint));
+    }
+    delete[] strPrint;
+    //IncreasePC();
+}
+
+
+
+
 void ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
@@ -296,72 +382,16 @@ void ExceptionHandler(ExceptionType which)
             ExceptionHandlerHalt();
             break;
         case SC_ReadChar:
-            int maxBytes, readBytes;
-            char *buffer;
-            maxBytes = 255;
-            buffer = new char[maxBytes];
-            readBytes = syncCons->Read(buffer, maxBytes);
-            if (readBytes > 1)
-            {
-                printf("Error: Read more than one character\n");
-                DEBUG('a', "Error: Read more than one character\n");
-                interrupt->Halt();
-            }
-            else if (readBytes == 0)
-            {
-                printf("Error: Read zero characters\n");
-                DEBUG('a', "Error: Read zero characters\n");
-                interrupt->Halt();
-            }
-            else
-            {
-                machine->WriteRegister(2, buffer[0]);
-            }
-            delete[] buffer;
-            //printf("Error: Read string failed\n");
-            DEBUG('a', "SyscallException: SC_ReadChar\n");
+            ReadCharHandler();
             break;
         case SC_PrintChar:
-            char ch;
-            ch = (char)machine->ReadRegister(4);
-            syncCons->Write(&ch, 1);
-            DEBUG('a', "SyscallException: SC_PrintChar\n");
+            PrintCharHandler();
             break;
         case SC_ReadString:
-            int virtAddr, length;
-            virtAddr = machine->ReadRegister(4);
-            length = machine->ReadRegister(5);
-            char *str;
-            str = new char[length];
-            syncCons->Read(str, length);
-            if (length < 0)
-            {
-                //printf("Error: Read string failed\n");
-                //DEBUG('a', "Error: Read string failed\n");
-                interrupt->Halt();
-            }
-            else
-            {
-                System2User(virtAddr, length, str);
-            }
-            delete[] str;
+            ReadStringHandler();
             break;
         case SC_PrintString:
-            int virtAddrStr;
-            virtAddrStr = machine->ReadRegister(4);
-            char *strPrint;
-            strPrint = User2System(virtAddrStr, 255);
-            if (strPrint == NULL)
-            {
-                //printf("Error: Print string failed\n");
-                //DEBUG('a', "Error: Print string failed\n");
-                interrupt->Halt();
-            }
-            else
-            {
-                syncCons->Write(strPrint, strlen(strPrint));
-            }
-            delete[] strPrint;
+            PrintStringHandler();
             break;
         case SC_Create:
             createFile();
