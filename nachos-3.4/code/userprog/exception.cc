@@ -25,6 +25,8 @@
 #include "system.h"
 #include "syscall.h"
 
+const int MaxFileLength = 32;
+
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -46,12 +48,11 @@
 //
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	are in machine.h.
-//----------------------------------------------------------------------
 
 void ExceptionHandlerHalt()
 {
-    DEBUG('a', "\n Shutdown, initiated by user program.");
-    printf("\n Shutdown, initiated by user program.");
+    DEBUG('a', "\n Shutdown, initiated by user program");
+    printf("\n Shutdown, initiated by user program .");
     interrupt->Halt();
 }
 
@@ -63,6 +64,135 @@ void IncreasePC()
     machine->WriteRegister(NextPCReg, pcAfter);
 }
 
+char* User2System(int virtAddr, int limit) 
+{ 
+    int i;
+    int oneChar; 
+    char* kernelBuf = NULL; 
+    kernelBuf = new char[limit + 1];
+    if (kernelBuf == NULL) return kernelBuf;
+    memset(kernelBuf, 0, limit + 1); 
+    for (i = 0; i < limit; i++) { 
+        machine->ReadMem(virtAddr + i, 1, &oneChar); 
+        kernelBuf[i] = (char)oneChar; 
+        if (oneChar == 0) 
+        break; 
+    } 
+    return kernelBuf; 
+} 
+
+int System2User(int virtAddr, int len, char* buffer)  { 
+    if (len < 0) return -1; 
+    if (len == 0) return len; 
+    int i = 0; 
+    int oneChar = 0 ; 
+
+    do { 
+    oneChar = (int) buffer[i]; 
+    machine->WriteMem(virtAddr + i, 1, oneChar); 
+    i++; 
+    } while(i < len && oneChar != 0); 
+    
+    return i; 
+}
+
+//----------------------------------------------------------------------
+// Function to handle system call
+void createFile()
+{
+    printf("Create File \n");
+    int virtAddr;
+    char* filename;
+    virtAddr = machine->ReadRegister(4);
+    filename = User2System(virtAddr, MaxFileLength + 1);
+    if (filename == NULL)
+    {
+        printf("\n Not enough memory in system");
+        machine->WriteRegister(2, -1);
+        delete filename;
+        return;
+    }
+    if (!fileSystem->Create(filename, 0))
+    {
+        printf("\n Error create file '%s'", filename);
+        machine->WriteRegister(2, -1);
+        delete filename;
+        return;
+    }
+    machine->WriteRegister(2, 0);
+    delete filename;
+}
+
+void openFile() {
+    printf("Open File\n");
+    int virtAddr = machine->ReadRegister(4); // Lay dia chi cua tham so name tu thanh ghi so 4
+    int type = machine->ReadRegister(5); // Lay tham so type tu thanh ghi so 5
+    char* filename;
+    filename = User2System(virtAddr, MaxFileLength); // Copy chuoi tu vung nho User Space sang System Space voi bo dem name dai MaxFileLength
+    //Kiem tra xem OS con mo dc file khong
+    // update 4/1/2018
+    int freeSlot = fileSystem->FindFreeSlot();
+    if (freeSlot != -1)
+    {
+        if (type == 0 || type == 1)
+        {
+            if ((fileSystem->openf[freeSlot] = fileSystem->Open(filename, type)) != NULL) 
+                machine->WriteRegister(2, freeSlot);
+        }
+        else if (type == 2) machine->WriteRegister(2, 0); 
+        else machine->WriteRegister(2, 1); 
+        delete[] filename;
+        return;
+    }
+    machine->WriteRegister(2, -1);
+    
+    delete[] filename;
+}
+
+void closeFile() {
+    int fid = machine->ReadRegister(4); // Lay tham so type tu thanh ghi so 4
+    if (fid >= 0 && fid <= 10)
+    {
+        if (fileSystem->openf[fid] != NULL)
+        {
+            delete fileSystem->openf[fid];
+            fileSystem->openf[fid] = NULL;
+            machine->WriteRegister(2, 0);
+            return;
+        }
+    }
+    machine->WriteRegister(2, -1);
+}
+
+
+void write2File() {
+    int virtAddr = machine->ReadRegister(4); // Lay dia chi cua tham so buffer tu thanh ghi so 4
+    int size = machine->ReadRegister(5); // Lay tham so size tu thanh ghi so 5
+    int fid = machine->ReadRegister(6); // Lay tham so fid tu thanh ghi so 6
+    char* buffer;
+    buffer = User2System(virtAddr, size); // Copy chuoi tu vung nho User Space sang System Space voi bo dem buffer dai size
+    if (fid >= 0 && fid <= 10)
+    {
+        if (fileSystem->openf[fid] != NULL)
+        {
+            if (fileSystem->openf[fid]->type == 1)
+            {
+                if (fileSystem->openf[fid]->Write(buffer, size) > 0)
+                {
+                    machine->WriteRegister(2, size);
+                    delete[] buffer;
+                    return;
+                }
+            }
+        }
+    }
+    machine->WriteRegister(2, -1);
+    delete[] buffer;
+
+}
+
+//----------------------------------------------------------------------
+
 
 void
 ExceptionHandler(ExceptionType which)
@@ -71,28 +201,41 @@ ExceptionHandler(ExceptionType which)
     switch (which)
     {
     	case NoException:
-	    return;
-	case SyscallException:
+	        return;
+	    case SyscallException:
             switch (type)
             {
             	case SC_Halt:
             	    ExceptionHandlerHalt();
             	    break;
-		case SC_Open: //...
-		default:
-		    IncreasePC();
-	    }
+                case SC_Create:
+                    createFile();
+                    break;
+		case SC_Open:
+		    openFile();
+		    break;
+		case SC_Close:
+		    closeFile();
+		    break;
+		case SC_Write:
+		    write2File();
+		    break;
+		IncreasePC();
+	        }
 	    break;
-	case PageFaultException:
-	    printf("Unexpected user mode exception PageFaultException\n");
-	    interrupt->Halt();
+	    case PageFaultException:
+            DEBUG('a', "Unexpected user mode exception PageFaultException\n");
+            printf("Unexpected user mode exception PageFaultException\n");
+            interrupt->Halt();
             break;
     	case ReadOnlyException:
-            printf("Unexpected user mode exception ReadOnlyException\n");
+            DEBUG('a', "Unexpected user mode exception ReadOnlyException\n");
+	        printf("Unexpected user mode exception ReadOnlyException\n");
             interrupt->Halt();
             break;
     	case BusErrorException:
-            printf("Unexpected user mode exception BusErrorException\n");
+            DEBUG('a', "Unexpected user mode exception BusErrorException\n");
+	        printf("Unexpected user mode exception BusErrorException\n");
             interrupt->Halt();
             break;
     	case AddressErrorException:
@@ -100,28 +243,23 @@ ExceptionHandler(ExceptionType which)
             interrupt->Halt();
             break;
     	case OverflowException:
+	        DEBUG('a', "Unexpected user mode exception OverflowException\n");
             printf("Unexpected user mode exception OverflowException\n");
             interrupt->Halt();
             break;
    	case IllegalInstrException:
-            printf("Unexpected user mode exception IllegalInstrException\n");
+            DEBUG('a', "Unexpected user mode exception IllegalInstrException\n");
+	        printf("Unexpected user mode exception IllegalInstrException\n");
             interrupt->Halt();
             break;
     	case NumExceptionTypes:
-            printf("Unexpected user mode exception NumExceptionTypes\n");
+            DEBUG('a', "Unexpected user mode exception NumExceptionTypes\n");
+	        printf("Unexpected user mode exception NumExceptionTypes\n");
             interrupt->Halt();
             break;
     	default:
-            printf("\n Unexpected user mode exception (%d %d)", which, type);
+            DEBUG('a', "Unexpected user mode exception (%d %d)\n", which, type);
+	        printf("\n Unexpected user mode exception (%d %d)", which, type);
             interrupt->Halt();
-    }
-    
-
-    if ((which == SyscallException) && (type == SC_Halt)) {
-	DEBUG('a', "Shutdown, initiated by user program.\n");
-   	interrupt->Halt();
-    } else {
-	printf("Unexpected user mode exception %d %d\n", which, type);
-	ASSERT(FALSE);
     }
 }
