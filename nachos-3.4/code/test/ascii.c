@@ -3,24 +3,40 @@
 
 #define MAX_LENGTH 255
 
-int main()
-{   
-    int i, id;
+int main() {
+    int i, id, j, temp, count;
     char s[MAX_LENGTH];
 
     // Create the file "ascii.txt" if it doesn't exist
     Create("ascii.txt");
 
+    // Open the file with write permissions
     id = Open("ascii.txt", 0);
     if (id < 0) {
         PrintString("Failed to open file\n");
         return 1; // Return with error code
     }
 
-    for (i = 0; i < 128; i++)
-    {
-        s[0] = i;
-        Write(s, 0, id);
+    // Write ASCII characters to the file
+    for (i = 32; i < 127; i++) {
+        // Convert integer i to ASCII decimal representation manually
+        temp = i;
+        count = 0;
+        while (temp != 0) {
+            temp /= 10;
+            count++;
+        }
+        temp = i;
+        for (j = count - 1; j >= 0; j--) {
+            s[j] = (temp % 10) + '0';
+            temp /= 10;
+        }
+        s[count] = ' ';
+        s[count + 1] = i;
+        s[count + 2] = '\n';
+        s[count + 3] = '\0';
+        // Write the string to the file
+        Write(s, count + 3, id);
     }
 
     // Close the file
