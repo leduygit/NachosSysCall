@@ -42,5 +42,8 @@ int main() {
     // Close the file
     Close(id);
 
+    // print notification
+    PrintString("Write ASCII table to file ascii.txt successfully\n");
+
     return 0;
 }
