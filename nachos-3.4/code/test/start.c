@@ -74,45 +74,45 @@ Join:
 	j	$31
 	.end Join
 
-	.globl Create
-	.ent	Create
-Create:
+	.globl CreateF
+	.ent	CreateF
+CreateF:
 	addiu $2,$0,SC_Create
 	syscall
 	j	$31
-	.end Create
+	.end CreateF
 
-	.globl Open
-	.ent	Open
-Open:
+	.globl OpenF
+	.ent	OpenF
+OpenF:
 	addiu $2,$0,SC_Open
 	syscall
 	j	$31
-	.end Open
+	.end OpenF
 
-	.globl Read
-	.ent	Read
-Read:
+	.globl ReadF
+	.ent	ReadF
+ReadF:
 	addiu $2,$0,SC_Read
 	syscall
 	j	$31
-	.end Read
+	.end ReadF
 
-	.globl Write
-	.ent	Write
-Write:
-	addiu $2,$0,SC_Write
+	.globl WriteF
+	.ent	WriteF
+WriteF:
+	addiu $2,$0,SC_WriteF
 	syscall
 	j	$31
-	.end Write
+	.end WriteF
 
-	.globl Close
-	.ent	Close
-Close:
+	.globl CloseF
+	.ent	CloseF
+CloseF:
 	addiu $2,$0,SC_Close
 	syscall
 	j	$31
-	.end Close
+	.end CloseF
 
 	.globl Fork
 	.ent	Fork

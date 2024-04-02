@@ -4,10 +4,10 @@
 int main()
 {	
 	int id;
-	char *s;
-	id = Open("test.txt", 0);
-	Read(s, 2, id);
-	Close(id);
-	PrintString(s);
+	if (CreateF("test.txt") == 0) PrintString("Create file success\n");
+	id = OpenF("test.txt", 0);
+	if (id >= 0 && id <= 10) PrintString("Open file success\n");
+	WriteF("Hello world", 11, id);
+ 	CloseF(id);
 	return 0;
 }

@@ -127,6 +127,7 @@ void createFile()
         return;
     }
     delete[] filename;
+    printf("Create f")
     machine->WriteRegister(2, 0);
 }
 
