@@ -40,6 +40,8 @@
 #define SC_ReadString	17
 #define SC_PrintString	18
 
+#define SC_CompareFloat 19
+
 #ifndef IN_ASM
 
 
@@ -57,6 +59,7 @@ int ReadInt();
 int ReadFloat();
 void PrintInt(int number);
 void PrintFloat(int number);
+int CompareFloat(int a, int b);
 
 char ReadChar();
 void PrintChar(char character);
