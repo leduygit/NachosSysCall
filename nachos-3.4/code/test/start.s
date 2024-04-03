@@ -129,6 +129,38 @@ Yield:
 	syscall
 	j	$31
 	.end Yield
+	
+	.globl ReadInt
+	.ent	ReadInt
+ReadInt:
+	addiu $2,$0,SC_ReadInt
+	syscall
+	j	$31
+	.end ReadInt
+
+	.globl ReadFloat
+	.ent	ReadFloat
+ReadFloat:
+	addiu $2,$0,SC_ReadFloat
+	syscall
+	j	$31
+	.end ReadFloat
+
+	.globl PrintInt
+	.ent	PrintInt
+PrintInt:
+	addiu $2,$0,SC_PrintInt
+	syscall
+	j	$31
+	.end PrintInt
+
+	.globl PrintFloat
+	.ent	PrintFloat
+PrintFloat:
+	addiu $2,$0,SC_PrintFloat
+	syscall
+	j	$31
+	.end PrintFloat
 
 	.globl ReadChar
 	.ent	ReadChar
@@ -162,10 +194,17 @@ PrintString:
 	j	$31
 	.end PrintString
 
+	.globl CompareFloat
+	.ent	CompareFloat
+CompareFloat:
+	addiu $2,$0,SC_CompareFloat
+	syscall
+	j	$31
+	.end CompareFloat
+
 /* dummy function to keep gcc happy */
         .globl  __main
         .ent    __main
 __main:
         j       $31
         .end    __main
-

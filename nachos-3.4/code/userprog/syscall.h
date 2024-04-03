@@ -29,10 +29,18 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
+
+#define SC_ReadInt	11
+#define SC_ReadFloat	12
+#define SC_PrintInt	13
+#define SC_PrintFloat   14
+
 #define SC_ReadChar	15
 #define SC_PrintChar	16
 #define SC_ReadString	17
 #define SC_PrintString	18
+
+#define SC_CompareFloat 19
 
 #ifndef IN_ASM
 
@@ -46,6 +54,12 @@
  * are then invoked in the Nachos kernel, after appropriate error checking, 
  * from the system call entry point in exception.cc.
  */
+
+int ReadInt();
+int ReadFloat();
+void PrintInt(int number);
+void PrintFloat(int number);
+int CompareFloat(int a, int b);
 
 char ReadChar();
 void PrintChar(char character);
