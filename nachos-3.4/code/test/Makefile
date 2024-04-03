@@ -35,11 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-<<<<<<< HEAD
-all: halt shell matmult sort createFile readchar
-=======
 all: halt shell matmult sort createFile readint readchar help ascii quicksort mergesort
->>>>>>> 8a78f601b5ee69d8893ef0636c205fb601ad8081
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -86,22 +82,16 @@ createFile.o: createFile.c
 createFile: createFile.o start.o
 	$(LD) $(LDFLAGS) start.o createFile.o -o createFile.coff
 	../bin/coff2noff createFile.coff createFile
-<<<<<<< HEAD
-=======
 readint.o: readint.c
 	$(CC) $(CFLAGS) -c readint.c
 readint: readint.o start.o
 	$(LD) $(LDFLAGS) start.o readint.o -o readint.coff
 	../bin/coff2noff readint.coff readint
 
->>>>>>> 8a78f601b5ee69d8893ef0636c205fb601ad8081
 readchar.o: readchar.c
 	$(CC) $(CFLAGS) -c readchar.c
 readchar: readchar.o start.o
 	$(LD) $(LDFLAGS) start.o readchar.o -o readchar.coff
-<<<<<<< HEAD
-	../bin/coff2noff readchar.coff readchar
-=======
 	../bin/coff2noff readchar.coff readchar
 
 help.o: help.c
@@ -128,4 +118,3 @@ mergesort.o: mergesort.c
 mergesort: mergesort.o start.o
 	$(LD) $(LDFLAGS) start.o mergesort.o -o mergesort.coff
 	../bin/coff2noff mergesort.coff mergesort
->>>>>>> 8a78f601b5ee69d8893ef0636c205fb601ad8081
