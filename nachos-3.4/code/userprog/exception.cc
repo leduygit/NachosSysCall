@@ -142,7 +142,7 @@ void ReadIntHandler() {
     intNumber = llNumber;
     machine->WriteRegister(2, intNumber);
     delete[] bufer;
-    IncreasePC();
+    //IncreasePC();
 }
 
 
@@ -185,7 +185,7 @@ void ReadFloatHandler() {
 	}
 	memcpy(&integerNumber, &ReadFloatResult, sizeof(float));
 	machine->WriteRegister(2, integerNumber);
-    IncreasePC();
+    //IncreasePC();
 }
 
 void PrintIntHandler() {
@@ -203,7 +203,7 @@ void PrintIntHandler() {
     // Write the string to the console
     syncCons->Write("The integer number you entered is: ", strlen("The integer number you entered is: ") + 1);
     syncCons->Write(PrintedBuffer, PrintedIndex + 1); // +1 to include the null terminator
-    IncreasePC();
+    //IncreasePC();
 }
 
 void PrintFloatHandler() {
@@ -217,7 +217,7 @@ void PrintFloatHandler() {
 
     syncCons->Write("The float number you entered is: ", strlen("The float number you entered is: ") + 1);
     syncCons->Write(PrintFloatBuffer, strlen(PrintFloatBuffer) + 1);
-    IncreasePC();
+    //IncreasePC();
 }
 
 //----------------------------------------------------------------------
