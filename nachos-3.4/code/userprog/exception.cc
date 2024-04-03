@@ -97,6 +97,129 @@ int System2User(int virtAddr, int len, char* buffer)  {
     return i; 
 }
 
+void ReadIntHandler() {
+    long long llNumber;
+    int nDigit, i, MAX_BUFFER, INT_MIN, INT_MAX, intNumber;
+    bool isNegative;
+    char* bufer;
+
+    llNumber = 0;
+    //intNumber = 0;
+    nDigit = 0;
+    MAX_BUFFER = 255;
+    INT_MIN = -2147483648;
+    INT_MAX = 2147483647;
+    bufer = new char[MAX_BUFFER+1];
+
+    syncCons->Write("Write an integer number: ", strlen("Write an integer number: ") + 1);
+    nDigit = syncCons->Read(bufer, MAX_BUFFER);
+
+    isNegative = (bufer[0] == '-' ? 1 : 0);
+    
+    // Handle weird character
+    for (i = isNegative; i < nDigit; ++i) {
+        if (bufer[i] < '0' || bufer[i] > '9') {
+            DEBUG('a', "\n The integer number is not valid");
+  	    syncCons->Write("Expected integer but ", strlen("Expected integer but ") + 1); 
+	    syncCons->Write(bufer, strlen(bufer) + 1);
+	    syncCons->Write(" found\n", strlen(" found\n") + 1);
+            machine->WriteRegister(2, 0);
+            delete[] bufer;
+            return;
+        }
+        llNumber = llNumber * 10 + (bufer[i] - '0');
+    }
+    llNumber = (isNegative ? llNumber * -1 : llNumber);
+
+    // Handle negation separately to prevent overflow
+    if (llNumber < INT_MIN || llNumber > INT_MAX || nDigit - isNegative > 10) {
+        DEBUG('a', "\n The integer number is not valid");
+	syncCons->Write("Overflow occured!\n", strlen("Overflow occured!\n") + 1);
+        machine->WriteRegister(2, 0);
+        delete[] bufer;
+        return;
+    }
+    intNumber = llNumber;
+    machine->WriteRegister(2, intNumber);
+    delete[] bufer;
+    IncreasePC();
+}
+
+
+void ReadFloatHandler() {
+	float ReadFloatResult;
+	char ReadFloatBuffer[255 + 2];
+	memset(ReadFloatBuffer, 0, sizeof(ReadFloatBuffer));		
+	int ReadFloatLength, i3, integerNumber, dotCount;
+	bool isFloat, isNegative;
+
+	syncCons->Write("Write a float number: ", strlen("Write a float number: ") + 1);		
+	ReadFloatLength = syncCons->Read(ReadFloatBuffer, 255 + 1);
+	dotCount = 0;
+
+	if (ReadFloatLength != 0)
+	{
+		isFloat = true;
+		isNegative = (ReadFloatBuffer[0] == '-');
+		for (i3 = isNegative; i3 < ReadFloatLength; ++i3)
+		{
+			if ((ReadFloatBuffer[i3] < '0' || ReadFloatBuffer[i3] > '9'))
+			{
+			   if (ReadFloatBuffer[i3] == '.' && dotCount == 0) {
+				++dotCount; 
+				continue;
+			   }
+			   syncCons->Write("Expected float but ", strlen("Expected float but ") + 1); 
+			   syncCons->Write(ReadFloatBuffer, strlen(ReadFloatBuffer) + 1);
+			   syncCons->Write(" found\n", strlen(" found\n") + 1);
+			   isFloat = false;
+			   break;
+			}
+		}	
+		ReadFloatResult = 0.0f;
+		if (isFloat)
+		{
+			ReadFloatResult = atof(ReadFloatBuffer);
+		}
+
+	}
+	memcpy(&integerNumber, &ReadFloatResult, sizeof(float));
+	machine->WriteRegister(2, integerNumber);
+    IncreasePC();
+}
+
+void PrintIntHandler() {
+    int PrintedNumber;
+    char PrintedBuffer[255]; 
+    int PrintedIndex = 0;
+
+    PrintedNumber = machine->ReadRegister(4);
+
+    PrintedIndex = sprintf(PrintedBuffer, "%d", PrintedNumber);
+
+    // Ensure null termination of the string
+    PrintedBuffer[PrintedIndex] = '\0';
+
+    // Write the string to the console
+    syncCons->Write("The integer number you entered is: ", strlen("The integer number you entered is: ") + 1);
+    syncCons->Write(PrintedBuffer, PrintedIndex + 1); // +1 to include the null terminator
+    IncreasePC();
+}
+
+void PrintFloatHandler() {
+    float PrintFloatNumber;
+    int PrintFloatInteger;
+    char PrintFloatBuffer[255];
+
+    PrintFloatInteger = (machine->ReadRegister(4));
+    memcpy(&PrintFloatNumber, &PrintFloatInteger, sizeof(float));
+    sprintf(PrintFloatBuffer, "%f", PrintFloatNumber);    
+
+    syncCons->Write("The float number you entered is: ", strlen("The float number you entered is: ") + 1);
+    syncCons->Write(PrintFloatBuffer, strlen(PrintFloatBuffer) + 1);
+    IncreasePC();
+}
+
 //----------------------------------------------------------------------
 // Function to handle system call
 
@@ -380,6 +503,18 @@ void ExceptionHandler(ExceptionType which)
         {
         case SC_Halt:
             ExceptionHandlerHalt();
+            break;
+        case SC_ReadInt:
+            ReadIntHandler();
+            break;
+        case SC_ReadFloat:
+            ReadFloatHandler();
+            break;
+        case SC_PrintInt:
+            PrintIntHandler();
+            break;
+        case SC_PrintFloat:
+            PrintFloatHandler();
             break;
         case SC_ReadChar:
             ReadCharHandler();
