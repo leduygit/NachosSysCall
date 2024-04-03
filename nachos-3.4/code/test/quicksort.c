@@ -56,8 +56,8 @@ int main()
     quicksort(a, 0, n - 1);
     
     // write to quicksort.txt
-    Create("quicksort.txt");
-    id = Open("quicksort.txt", 0);
+    CreateF("quicksort.txt");
+    id = OpenF("quicksort.txt", 0);
     if (id < 0)
     {
         PrintString("Failed to open file\n");
@@ -67,11 +67,11 @@ int main()
     for (i = 0; i < n; i++)
     {
         PrintIntToFile(a[i], id);
-        Write("\n", 1, id);
+        WriteF("\n", 1, id);
     }
 
 
-    Close(id);
+    CloseF(id);
     PrintString("Write quicksort to file quicksort.txt successfully\n");
     //free(a);
 }

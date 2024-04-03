@@ -8,10 +8,10 @@ int main() {
     char s[MAX_LENGTH];
 
     // Create the file "ascii.txt" if it doesn't exist
-    Create("ascii.txt");
+    CreateF("ascii.txt");
 
     // Open the file with write permissions
-    id = Open("ascii.txt", 0);
+    id = OpenF("ascii.txt", 0);
     if (id < 0) {
         PrintString("Failed to open file\n");
         return 1; // Return with error code
@@ -36,11 +36,11 @@ int main() {
         s[count + 2] = '\n';
         s[count + 3] = '\0';
         // Write the string to the file
-        Write(s, count + 3, id);
+        WriteF(s, count + 3, id);
     }
 
     // Close the file
-    Close(id);
+    CloseF(id);
 
     // print notification
     PrintString("Write ASCII table to file ascii.txt successfully\n");

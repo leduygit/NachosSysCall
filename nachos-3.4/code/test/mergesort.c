@@ -60,8 +60,8 @@ int main() {
     mergesort(a, 0, n - 1);
 
     // write to mergesort.txt
-    Create("mergesort.txt");
-    id = Open("mergesort.txt", 0);
+    CreateF("mergesort.txt");
+    id = OpenF("mergesort.txt", 0);
     if (id < 0) {
         PrintString("Failed to open file\n");
         return 1;
@@ -70,9 +70,9 @@ int main() {
     precision = 1000;
     for (i = 0; i < n; i++) {
         PrintFloatToFile(a[i], id);
-        Write("\n", 1, id);
+        WriteF("\n", 1, id);
     }
 
-    Close(id);
+    CloseF(id);
     PrintString("Write mergesort to file mergesort.txt successfully\n");
 }
