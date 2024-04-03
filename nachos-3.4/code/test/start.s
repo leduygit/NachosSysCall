@@ -194,6 +194,14 @@ PrintString:
 	j	$31
 	.end PrintString
 
+	.globl CompareFloat
+	.ent	CompareFloat
+CompareFloat:
+	addiu $2,$0,SC_CompareFloat
+	syscall
+	j	$31
+	.end CompareFloat
+
 /* dummy function to keep gcc happy */
         .globl  __main
         .ent    __main

@@ -40,7 +40,10 @@
 #define SC_ReadString	17
 #define SC_PrintString	18
 
+#define SC_CompareFloat 19
+
 #ifndef IN_ASM
+
 
 /* The system call interface.  These are the operations the Nachos
  * kernel needs to support, to be able to run user programs.
@@ -56,6 +59,7 @@ int ReadInt();
 int ReadFloat();
 void PrintInt(int number);
 void PrintFloat(int number);
+int CompareFloat(int a, int b);
 
 char ReadChar();
 void PrintChar(char character);
@@ -107,15 +111,15 @@ typedef int OpenFileId;
 #define ConsoleOutput	1  
  
 /* Create a Nachos file, with "name" */
-void Create(char *name);
+int Create(char *name);
 
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
  */
-OpenFileId Open(char *name);
+OpenFileId Open(char *name, int type);
 
 /* Write "size" bytes from "buffer" to the open file. */
-void Write(char *buffer, int size, OpenFileId id);
+int Write(char *buffer, int size, OpenFileId id);
 
 /* Read "size" bytes from the open file into "buffer".  
  * Return the number of bytes actually read -- if the open file isn't
