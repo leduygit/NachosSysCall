@@ -69,40 +69,8 @@ int main() {
 
     precision = 1000;
     for (i = 0; i < n; i++) {
-        f = a[i];
-        f *= precision;
-        x = (int)f;
-        count = 0;
-        decimalPosition = count; // Store the position of the decimal point
-
-        // Count the number of digits before the decimal point
-        while (x != 0) {
-            x /= 10;
-            count++;
-        }
-
-        x = (int)f;
-        for (j = count - 1; j >= 0; j--) {
-            s[j] = (x % 10) + '0';
-            x /= 10;
-        }
-
-        // Insert the decimal point at the appropriate position
-        if (decimalPosition == 0) {
-            s[count++] = '0'; // If there are no digits before the decimal point, insert '0'
-        }
-        for (j = count; j > decimalPosition; j--) {
-            s[j] = s[j - 1];
-        }
-        s[decimalPosition] = '.';
-
-        s[count + 1] = '\0'; // Ensure the string is null-terminated
-
-        // write to file
-        for (j = 0; j <= count; j++) // Modified loop to include the decimal point
-        {
-            Write(&s[j], 1, id);
-        }
+        PrintFloatToFile(a[i], id);
+        Write("\n", 1, id);
     }
 
     Close(id);

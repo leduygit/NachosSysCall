@@ -534,6 +534,69 @@ void PrintStringHandler()
     // IncreasePC();
 }
 
+void PrintIntToFileHandler()
+{
+    int number, id;
+    number = machine->ReadRegister(4);
+    id = machine->ReadRegister(5);
+    char buffer[255];
+    sprintf(buffer, "%d", number);
+    int length;
+    length = strlen(buffer);
+    if (id < 0 || id > 10)
+    {
+        printf("Error: Print int to file failed\n");
+        DEBUG('a', "Error: Print int to file failed\n");
+        interrupt->Halt();
+    }
+    if (fileSystem->openf[id] == NULL)
+    {
+        printf("Error: Print int to file failed\n");
+        DEBUG('a', "Error: Print int to file failed\n");
+        interrupt->Halt();
+    }
+    if (fileSystem->openf[id]->type == 3)
+    {
+        printf("Error: Print int to file failed\n");
+        DEBUG('a', "Error: Print int to file failed\n");
+        interrupt->Halt();
+    }
+    fileSystem->openf[id]->Write(buffer, length);
+    // IncreasePC();
+}
+
+void PrintFloatToFileHandler()
+{
+    int number, id;
+    number = machine->ReadRegister(4);
+    id = machine->ReadRegister(5);
+    char buffer[255];
+    float f;
+    memcpy(&f, &number, sizeof(float));
+    sprintf(buffer, "%f", f);
+    int length = strlen(buffer);
+    if (id < 0 || id > 10)
+    {
+        printf("Error: Print float to file failed\n");
+        DEBUG('a', "Error: Print float to file failed\n");
+        interrupt->Halt();
+    }
+    if (fileSystem->openf[id] == NULL)
+    {
+        printf("Error: Print float to file failed\n");
+        DEBUG('a', "Error: Print float to file failed\n");
+        interrupt->Halt();
+    }
+    if (fileSystem->openf[id]->type == 3)
+    {
+        printf("Error: Print float to file failed\n");
+        DEBUG('a', "Error: Print float to file failed\n");
+        interrupt->Halt();
+    }
+    fileSystem->openf[id]->Write(buffer, length);
+    // IncreasePC();
+}
+
 void ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
@@ -588,6 +651,12 @@ void ExceptionHandler(ExceptionType which)
             break;
         case SC_CompareFloat:
             CompareFloatHandler();
+            break;
+        case SC_PrintIntToFile:
+            PrintIntToFileHandler();
+            break;
+        case SC_PrintFloatToFile:
+            PrintFloatToFileHandler();
             break;
         default:
             DEBUG('a', "Unexpected user mode exception (%d %d)\n", which, type);

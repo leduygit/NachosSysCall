@@ -202,6 +202,22 @@ CompareFloat:
 	j	$31
 	.end CompareFloat
 
+	.globl PrintIntToFile
+	.ent	PrintIntToFile
+PrintIntToFile:
+	addiu $2,$0,SC_PrintIntToFile
+	syscall
+	j	$31
+	.end PrintIntToFile
+
+	.globl PrintFloatToFile
+	.ent	PrintFloatToFile
+PrintFloatToFile:
+	addiu $2,$0,SC_PrintFloatToFile
+	syscall
+	j	$31
+	.end PrintFloatToFile
+
 /* dummy function to keep gcc happy */
         .globl  __main
         .ent    __main
