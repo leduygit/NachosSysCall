@@ -101,7 +101,7 @@ ReadF:
 	.globl WriteF
 	.ent	WriteF
 WriteF:
-	addiu $2,$0,SC_WriteF
+	addiu $2,$0,SC_Write
 	syscall
 	j	$31
 	.end WriteF
