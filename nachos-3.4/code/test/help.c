@@ -7,9 +7,8 @@ int main()
     char s[MAX_LENGTH];
     id = OpenF("mota.txt", 0);
     // read until end of file
-    while (ReadF(s, MAX_LENGTH, id) > 0)
-    {
-        WriteF(s, MAX_LENGTH, 1);
+    while (ReadF(s, MAX_LENGTH, id) > 0) {
+        PrintString(s);
     }
     CloseF(id);
     return 0;
