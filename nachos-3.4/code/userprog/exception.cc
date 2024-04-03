@@ -55,6 +55,7 @@ void ExceptionHandlerHalt()
     printf("\n Shutdown, initiated by user program .");
     interrupt->Halt();
 }
+//----------------------------------------------------------------------
 
 void IncreasePC()
 {
@@ -62,6 +63,13 @@ void IncreasePC()
     machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
     machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
     machine->WriteRegister(NextPCReg, pcAfter);
+}
+
+void ExceptionHandlerHalt()
+{
+    DEBUG('a', "\n Shutdown, initiated by user program.");
+    printf("\n Shutdown, initiated by user program.");
+    interrupt->Halt();
 }
 
 char* User2System(int virtAddr, int limit) 
@@ -127,7 +135,6 @@ void createFile()
         return;
     }
     delete[] filename;
-    printf("Create f")
     machine->WriteRegister(2, 0);
 }
 
@@ -283,6 +290,206 @@ void write2File() {
 
 //----------------------------------------------------------------------
 
+void ReadIntHandler() {
+    long long llNumber;
+    int nDigit, i, MAX_BUFFER, INT_MIN, INT_MAX, intNumber;
+    bool isNegative;
+    char* bufer;
+
+    llNumber = 0;
+    //intNumber = 0;
+    nDigit = 0;
+    MAX_BUFFER = 255;
+    INT_MIN = -2147483648;
+    INT_MAX = 2147483647;
+    bufer = new char[MAX_BUFFER+1];
+
+    syncCons->Write("Write an integer number: ", strlen("Write an integer number: ") + 1);
+    nDigit = syncCons->Read(bufer, MAX_BUFFER);
+
+    isNegative = (bufer[0] == '-' ? 1 : 0);
+    
+    // Handle weird character
+    for (i = isNegative; i < nDigit; ++i) {
+        if (bufer[i] < '0' || bufer[i] > '9') {
+            DEBUG('a', "\n The integer number is not valid");
+  	    syncCons->Write("Expected integer but ", strlen("Expected integer but ") + 1); 
+	    syncCons->Write(bufer, strlen(bufer) + 1);
+	    syncCons->Write(" found\n", strlen(" found\n") + 1);
+            machine->WriteRegister(2, 0);
+            delete[] bufer;
+            return;
+        }
+        llNumber = llNumber * 10 + (bufer[i] - '0');
+    }
+    llNumber = (isNegative ? llNumber * -1 : llNumber);
+
+    // Handle negation separately to prevent overflow
+    if (llNumber < INT_MIN || llNumber > INT_MAX || nDigit - isNegative > 10) {
+        DEBUG('a', "\n The integer number is not valid");
+	syncCons->Write("Overflow occured!\n", strlen("Overflow occured!\n") + 1);
+        machine->WriteRegister(2, 0);
+        delete[] bufer;
+        return;
+    }
+    intNumber = llNumber;
+    machine->WriteRegister(2, intNumber);
+    delete[] bufer;
+}
+
+
+void ReadFloatHandler() {
+	float ReadFloatResult;
+	char ReadFloatBuffer[255 + 2];
+	memset(ReadFloatBuffer, 0, sizeof(ReadFloatBuffer));		
+	int ReadFloatLength, i3, integerNumber, dotCount;
+	bool isFloat, isNegative;
+
+	syncCons->Write("Write a float number: ", strlen("Write a float number: ") + 1);		
+	ReadFloatLength = syncCons->Read(ReadFloatBuffer, 255 + 1);
+	dotCount = 0;
+
+	if (ReadFloatLength != 0)
+	{
+		isFloat = true;
+		isNegative = (ReadFloatBuffer[0] == '-');
+		for (i3 = isNegative; i3 < ReadFloatLength; ++i3)
+		{
+			if ((ReadFloatBuffer[i3] < '0' || ReadFloatBuffer[i3] > '9'))
+			{
+			   if (ReadFloatBuffer[i3] == '.' && dotCount == 0) {
+				++dotCount; 
+				continue;
+			   }
+			   syncCons->Write("Expected float but ", strlen("Expected float but ") + 1); 
+			   syncCons->Write(ReadFloatBuffer, strlen(ReadFloatBuffer) + 1);
+			   syncCons->Write(" found\n", strlen(" found\n") + 1);
+			   isFloat = false;
+			   break;
+			}
+		}	
+		ReadFloatResult = 0.0f;
+		if (isFloat)
+		{
+			ReadFloatResult = atof(ReadFloatBuffer);
+		}
+
+	}
+	memcpy(&integerNumber, &ReadFloatResult, sizeof(float));
+	machine->WriteRegister(2, integerNumber);
+}
+
+void PrintIntHandler() {
+    int PrintedNumber;
+    char PrintedBuffer[255]; 
+    int PrintedIndex = 0;
+
+    PrintedNumber = machine->ReadRegister(4);
+
+    PrintedIndex = sprintf(PrintedBuffer, "%d", PrintedNumber);
+
+    // Ensure null termination of the string
+    PrintedBuffer[PrintedIndex] = '\0';
+
+    // Write the string to the console
+    syncCons->Write("The integer number you entered is: ", strlen("The integer number you entered is: ") + 1);
+    syncCons->Write(PrintedBuffer, PrintedIndex + 1); // +1 to include the null terminator
+}
+
+void PrintFloatHandler() {
+    float PrintFloatNumber;
+    int PrintFloatInteger;
+    char PrintFloatBuffer[255];
+
+    PrintFloatInteger = (machine->ReadRegister(4));
+    memcpy(&PrintFloatNumber, &PrintFloatInteger, sizeof(float));
+    sprintf(PrintFloatBuffer, "%f", PrintFloatNumber);    
+
+    syncCons->Write("The float number you entered is: ", strlen("The float number you entered is: ") + 1);
+    syncCons->Write(PrintFloatBuffer, strlen(PrintFloatBuffer) + 1);
+}
+
+
+void ReadCharHandler()
+{
+    int maxBytes, readBytes;
+    char *buffer;
+    maxBytes = 255;
+    buffer = new char[maxBytes];
+    readBytes = syncCons->Read(buffer, maxBytes);
+    if (readBytes > 1)
+    {
+        printf("Error: Read more than one character\n");
+        DEBUG('a', "Error: Read more than one character\n");
+        interrupt->Halt();
+    }
+    else if (readBytes == 0)
+    {
+        printf("Error: Read zero characters\n");
+        DEBUG('a', "Error: Read zero characters\n");
+        interrupt->Halt();
+    }
+    else
+    {
+        machine->WriteRegister(2, buffer[0]);
+    }
+    delete[] buffer;
+    // printf("Error: Read string failed\n");
+    DEBUG('a', "SyscallException: SC_ReadChar\n");
+}
+
+void ReadStringHandler()
+{
+    int virtAddr, length;
+    virtAddr = machine->ReadRegister(4);
+    length = machine->ReadRegister(5);
+    char *str;
+    str = new char[length];
+    syncCons->Read(str, length);
+    if (length < 0)
+    {
+        // printf("Error: Read string failed\n");
+        // DEBUG('a', "Error: Read string failed\n");
+        interrupt->Halt();
+    }
+    else
+    {
+        System2User(virtAddr, length, str);
+    }
+    delete[] str;
+}
+
+void PrintCharHandler()
+{
+    char ch;
+    ch = (char)machine->ReadRegister(4);
+    syncCons->Write(&ch, 1);
+    DEBUG('a', "SyscallException: SC_PrintChar\n");
+}
+
+void PrintStringHandler()
+{
+    int virtAddrStr, maxBytes;
+    maxBytes = 255;
+    virtAddrStr = machine->ReadRegister(4);
+    char *strPrint;
+    strPrint = User2System(virtAddrStr, maxBytes);
+    if (strPrint == NULL)
+    {
+        // printf("Error: Print string failed\n");
+        // DEBUG('a', "Error: Print string failed\n");
+        interrupt->Halt();
+    }
+    else
+    {
+        syncCons->Write(strPrint, strlen(strPrint));
+    }
+    delete[] strPrint;
+}
+
+
+
+
 void ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
@@ -296,90 +503,46 @@ void ExceptionHandler(ExceptionType which)
         case SC_Halt:
             ExceptionHandlerHalt();
             break;
+        case SC_ReadInt:
+            ReadIntHandler();
+            break;
+        case SC_ReadFloat:
+            ReadFloatHandler();
+            break;
+        case SC_PrintInt:
+            PrintIntHandler();
+            break;
+        case SC_PrintFloat:
+            PrintFloatHandler();
+            break;
         case SC_ReadChar:
-            int maxBytes, readBytes;
-            char *buffer;
-            maxBytes = 255;
-            buffer = new char[maxBytes];
-            readBytes = syncCons->Read(buffer, maxBytes);
-            if (readBytes > 1)
-            {
-                printf("Error: Read more than one character\n");
-                DEBUG('a', "Error: Read more than one character\n");
-                interrupt->Halt();
-            }
-            else if (readBytes == 0)
-            {
-                printf("Error: Read zero characters\n");
-                DEBUG('a', "Error: Read zero characters\n");
-                interrupt->Halt();
-            }
-            else
-            {
-                machine->WriteRegister(2, buffer[0]);
-            }
-            delete[] buffer;
-            //printf("Error: Read string failed\n");
-            DEBUG('a', "SyscallException: SC_ReadChar\n");
+            ReadCharHandler();
             break;
         case SC_PrintChar:
-            char ch;
-            ch = (char)machine->ReadRegister(4);
-            syncCons->Write(&ch, 1);
-            DEBUG('a', "SyscallException: SC_PrintChar\n");
+            PrintCharHandler();
             break;
         case SC_ReadString:
-            int virtAddr, length;
-            virtAddr = machine->ReadRegister(4);
-            length = machine->ReadRegister(5);
-            char *str;
-            str = new char[length];
-            syncCons->Read(str, length);
-            if (length < 0)
-            {
-                //printf("Error: Read string failed\n");
-                //DEBUG('a', "Error: Read string failed\n");
-                interrupt->Halt();
-            }
-            else
-            {
-                System2User(virtAddr, length, str);
-            }
-            delete[] str;
+            ReadStringHandler();
             break;
         case SC_PrintString:
-            int virtAddrStr;
-            virtAddrStr = machine->ReadRegister(4);
-            char *strPrint;
-            strPrint = User2System(virtAddrStr, 255);
-            if (strPrint == NULL)
-            {
-                //printf("Error: Print string failed\n");
-                //DEBUG('a', "Error: Print string failed\n");
-                interrupt->Halt();
-            }
-            else
-            {
-                syncCons->Write(strPrint, strlen(strPrint));
-            }
-            delete[] strPrint;
+            PrintStringHandler();
             break;
         case SC_Create:
             createFile();
             break;
-	case SC_Open:
-	    openFile();
-	    break;
-	case SC_Close:
-	    closeFile();
-	    break;
-	case SC_Write:
-	    write2File();
-	    break;
-	case SC_Read:
-	    readFile();
-	    break;
-    }
+        case SC_Open:
+            openFile();
+            break;
+        case SC_Close:
+            closeFile();
+            break;
+        case SC_Write:
+            write2File();
+            break;
+        case SC_Read:
+            readFile();
+            break;
+        }
         break;
     case PageFaultException:
         DEBUG('a', "Unexpected user mode exception PageFaultException\n");
