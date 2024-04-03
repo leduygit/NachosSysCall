@@ -66,25 +66,8 @@ int main()
 
     for (i = 0; i < n; i++)
     {
-        //convert a[i] to char*
-        x = a[i];
-        count = 0;
-        while (x != 0)
-        {
-            x /= 10;
-            count++;
-        }
-        x = a[i];
-        for (j = count - 1; j >= 0; j--)
-        {
-            s[j] = (x % 10) + '0';
-            x /= 10;
-        }
-
-        s[count] = '\0';
-        // write to file
-        Write(s, count, id);
-        Write(" ", 1, id);
+        PrintIntToFile(a[i], id);
+        Write("\n", 1, id);
     }
 
 

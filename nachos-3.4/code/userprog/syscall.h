@@ -42,6 +42,9 @@
 
 #define SC_CompareFloat 19
 
+#define SC_PrintIntToFile 20
+#define SC_PrintFloatToFile 21
+
 #ifndef IN_ASM
 
 
@@ -119,6 +122,8 @@ int CreateF(char *name);
 OpenFileId OpenF(char *name, int type);
 
 /* Write "size" bytes from "buffer" to the open file. */
+void PrintIntToFile(int number, OpenFileId id);
+void PrintFloatToFile(int number, OpenFileId id);
 int WriteF(char *buffer, int size, OpenFileId id);
 
 /* Read "size" bytes from the open file into "buffer".  
