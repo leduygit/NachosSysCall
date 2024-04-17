@@ -30,6 +30,10 @@ SynchDisk   *synchDisk;
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
 SynchConsole* syncCons;
+Semaphore *addrLock;
+BitMap *gPhysPageBitMap;
+PTable *pTab;
+STable *semTab;
 #endif
 
 #ifdef NETWORK
@@ -151,6 +155,10 @@ Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine(debugUserProg);	// this must come first
     syncCons = new SynchConsole();
+    addrLock = new Semaphore("AddrLock", 1);
+    gPhysPageBitMap = new BitMap(256);
+    pTab = new PTable(10);
+    semTab = new STable();
 #endif
 
 #ifdef FILESYS
@@ -180,6 +188,11 @@ Cleanup()
     
 #ifdef USER_PROGRAM
     delete machine;
+    delete syncCons;
+    delete addrLock;
+    delete gPhysPageBitMap;
+    delete pTab;
+    delete semTab;
 #endif
 
 #ifdef FILESYS_NEEDED
