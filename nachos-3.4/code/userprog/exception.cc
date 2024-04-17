@@ -597,6 +597,26 @@ void PrintFloatToFileHandler()
     // IncreasePC();
 }
 
+int Up() {
+    int virtNameAddr = machine->ReadRegister(4);
+    char *name = User2System(virtNameAddr, 255);
+    int result = semTab->Signal(name);
+    if (result == -1) {
+        printf("Error: invalid semaphore name");
+    }
+    machine->WriteRegister(2, result);
+}
+
+int Down() {
+    int virtNameAddr = machine->ReadRegister(4);
+    char *name = User2System(virtNameAddr, 255);
+    int result = semTab->Wait(name);
+    if (result == -1) {
+        printf("Error: invalid semaphore name");
+    }
+    machine->WriteRegister(2, result);
+}
+
 void ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
@@ -657,6 +677,12 @@ void ExceptionHandler(ExceptionType which)
             break;
         case SC_PrintFloatToFile:
             PrintFloatToFileHandler();
+            break;
+        case SC_Up:
+            Up();
+            break;
+        case SC_Down:
+            Down();
             break;
         default:
             DEBUG('a', "Unexpected user mode exception (%d %d)\n", which, type);
