@@ -219,7 +219,7 @@ PrintFloatToFile:
 	.end PrintFloatToFile
 
 	.globl Up
-	.end Up
+	.ent Up
 Up:
 	addiu $2,$0,SC_Up
 	syscall
@@ -227,7 +227,7 @@ Up:
 	.end Up
 
 	.globl Down
-	.end Down
+	.ent Down
 Down:
 	addiu $2,$0,SC_Down
 	syscall

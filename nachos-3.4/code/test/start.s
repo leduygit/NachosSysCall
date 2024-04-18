@@ -218,12 +218,16 @@ PrintFloatToFile:
 	j	$31
 	.end PrintFloatToFile
 
+	.glob Up
+	.ent Up
 Up:
 	addiu $2,$0,SC_Up
 	syscall
 	j	$31
 	.end Up
 
+	.glob Down
+	.ent Down
 Down:
 	addiu $2,$0,SC_Down
 	syscall
