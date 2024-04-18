@@ -218,6 +218,18 @@ PrintFloatToFile:
 	j	$31
 	.end PrintFloatToFile
 
+Up:
+	addiu $2,$0,SC_Up
+	syscall
+	j	$31
+	.end Up
+
+Down:
+	addiu $2,$0,SC_Down
+	syscall
+	j	$31
+	.end Down
+
 /* dummy function to keep gcc happy */
         .globl  __main
         .ent    __main
