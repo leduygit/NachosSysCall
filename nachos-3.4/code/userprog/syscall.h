@@ -76,6 +76,7 @@ void ReadString(char *buffer, int size);
 void PrintString(char *buffer);
 
 int Up(char* name);
+int Down(char* name);
 
 /* Stop Nachos, and print out performance stats */
 void Halt();		
