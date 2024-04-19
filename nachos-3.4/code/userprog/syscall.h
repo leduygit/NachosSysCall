@@ -45,6 +45,10 @@
 #define SC_PrintIntToFile 20
 #define SC_PrintFloatToFile 21
 
+
+#define SC_Up 22
+#define SC_Down 23
+
 #define SC_CreateSemaphore 25
 
 #ifndef IN_ASM
@@ -70,6 +74,8 @@ char ReadChar();
 void PrintChar(char character);
 void ReadString(char *buffer, int size);
 void PrintString(char *buffer);
+
+int Up(char* name);
 
 /* Stop Nachos, and print out performance stats */
 void Halt();		
