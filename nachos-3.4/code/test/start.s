@@ -226,7 +226,7 @@ CreateSemaphore:
 	j	$31
 	.end CreateSemaphore
 
-	.glob Up
+	.globl Up
 	.ent Up
 Up:
 	addiu $2,$0,SC_Up
@@ -234,7 +234,7 @@ Up:
 	j	$31
 	.end Up
 
-	.glob Down
+	.globl Down
 	.ent Down
 Down:
 	addiu $2,$0,SC_Down
