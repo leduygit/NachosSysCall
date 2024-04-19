@@ -597,6 +597,36 @@ void PrintFloatToFileHandler()
     // IncreasePC();
 }
 
+
+void CreateSemaphoreHandler()
+{
+    int virtAddr, semValue, semId;
+    char *semName;
+    virtAddr = machine->ReadRegister(4);
+    semValue = machine->ReadRegister(5);
+    semName = User2System(virtAddr, MaxFileLength + 1);
+    if (semName == NULL)
+    {
+        printf("Error: Create semaphore failed\n");
+        DEBUG('a', "Error: Create semaphore failed\n");
+        machine->WriteRegister(2, -1);
+        delete[] semName;
+        interrupt->Halt();
+    }
+    semId = semTab->Create(semName, semValue);
+    if (semId < 0)
+    {
+        printf("Error: Create semaphore failed\n");
+        DEBUG('a', "Error: Create semaphore failed\n");
+        machine->WriteRegister(2, -1);
+        delete[] semName;
+        interrupt->Halt();
+    }
+    machine->WriteRegister(2, semId);
+
+    delete[] semName;
+}
+
 int Up() {
     int virtNameAddr = machine->ReadRegister(4);
     char *name = User2System(virtNameAddr, 255);
@@ -677,6 +707,9 @@ void ExceptionHandler(ExceptionType which)
             break;
         case SC_PrintFloatToFile:
             PrintFloatToFileHandler();
+            break;
+        case SC_CreateSemaphore:
+            CreateSemaphoreHandler();
             break;
         case SC_Up:
             Up();
