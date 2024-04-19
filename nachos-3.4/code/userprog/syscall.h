@@ -45,9 +45,11 @@
 #define SC_PrintIntToFile 20
 #define SC_PrintFloatToFile 21
 
+
 #define SC_Up 22
 #define SC_Down 23
 
+#define SC_CreateSemaphore 25
 
 #ifndef IN_ASM
 
@@ -131,6 +133,9 @@ OpenFileId OpenF(char *name, int type);
 void PrintIntToFile(int number, OpenFileId id);
 void PrintFloatToFile(int number, OpenFileId id);
 int WriteF(char *buffer, int size, OpenFileId id);
+
+/* Create Semaphore */
+int CreateSemaphore(char* name, int semval);
 
 /* Read "size" bytes from the open file into "buffer".  
  * Return the number of bytes actually read -- if the open file isn't
