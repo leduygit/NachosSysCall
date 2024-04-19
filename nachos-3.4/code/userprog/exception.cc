@@ -597,7 +597,7 @@ void PrintFloatToFileHandler()
     // IncreasePC();
 }
 
-int Up() {
+void UpHandler() {
     int virtNameAddr = machine->ReadRegister(4);
     char *name = User2System(virtNameAddr, 255);
     int result = semTab->Signal(name);
@@ -607,7 +607,7 @@ int Up() {
     machine->WriteRegister(2, result);
 }
 
-int Down() {
+void DownHandler() {
     int virtNameAddr = machine->ReadRegister(4);
     char *name = User2System(virtNameAddr, 255);
     int result = semTab->Wait(name);
@@ -615,6 +615,52 @@ int Down() {
         printf("Error: invalid semaphore name");
     }
     machine->WriteRegister(2, result);
+}
+
+void ExecHandler() {
+    int virtAddr, id;
+    OpenFile *executable;
+    char *filename;
+
+    virtAddr = machine->ReadRegister(4);
+    filename = User2System(virtAddr, 255);
+
+    if (filename == NULL) {
+        printf("Error: Not enough memory in system\n");
+        machine->WriteRegister(2, -1);
+        return;
+    }
+
+    executable = fileSystem->Open(filename);
+
+    if (executable == NULL) {
+        printf("Error: Unable to open file %s\n", filename);
+        machine->WriteRegister(2, -1);
+        return;
+    }
+
+    delete executable;
+
+    id = pTab->ExecUpdate(filename);
+    machine->WriteRegister(2, id);
+    delete[] filename;
+    return;
+}
+
+void ExitHandler() {
+    int status, result;
+    status = machine->ReadRegister(4);
+    result = pTab->ExitUpdate(status);
+    machine->WriteRegister(2, result);
+    return;
+}
+
+void JoinHandler() {
+    int id, result;
+    id = machine->ReadRegister(4);
+    result = pTab->JoinUpdate(id);
+    machine->WriteRegister(2, result);
+    return;
 }
 
 void ExceptionHandler(ExceptionType which)
@@ -679,10 +725,19 @@ void ExceptionHandler(ExceptionType which)
             PrintFloatToFileHandler();
             break;
         case SC_Up:
-            Up();
+            UpHandler();
             break;
         case SC_Down:
-            Down();
+            DownHandler();
+            break;
+        case SC_Exec:
+            ExecHandler();
+            break;
+        case SC_Exit:
+            ExitHandler();
+            break;
+        case SC_Join:
+            JoinHandler();
             break;
         default:
             DEBUG('a', "Unexpected user mode exception (%d %d)\n", which, type);
