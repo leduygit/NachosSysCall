@@ -648,6 +648,7 @@ void DownHandler() {
 }
 
 void ExecHandler() {
+    gPhysPageBitMap->Print();
     int virtAddr, id;
     OpenFile *executable;
     char *filename;
@@ -669,7 +670,7 @@ void ExecHandler() {
         return;
     }
 
-    delete executable;
+    // delete executable;
 
     id = pTab->ExecUpdate(filename);
     machine->WriteRegister(2, id);

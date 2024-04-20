@@ -155,7 +155,7 @@ Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine(debugUserProg);	// this must come first
     syncCons = new SynchConsole();
-    addrLock = new Semaphore("AddrLock", 1);
+    addrLock = new Semaphore("addrLock", 1);
     gPhysPageBitMap = new BitMap(256);
     pTab = new PTable(10);
     semTab = new STable();
