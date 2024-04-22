@@ -189,6 +189,10 @@ AddrSpace::AddrSpace(char* filename)
     // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
 
+    for (i = 0; i < 10; i++) {
+        printf("%d = %d\n", i, gPhysPageBitMap->Test(i));
+    }
+
     for (i = 0; i < numPages; i++)
     {
     	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
