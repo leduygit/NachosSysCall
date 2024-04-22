@@ -2,10 +2,6 @@
 #include "system.h"
 #include "openfile.h"
 
-
-
-#define For(i,a,b) for (int i = (a); i < b; ++i)
-
 PTable::PTable(int size)
 {
 
@@ -16,14 +12,14 @@ PTable::PTable(int size)
     bm = new BitMap(size);
     bmsem = new Semaphore("bmsem",1);
 
-    For(i,0,MAX_PROCESS){
+	int i;
+	for (i = 0; i < MAX_PROCESS; i++) {
 		pcb[i] = 0;
     }
 
 	bm->Mark(0);
 
 	pcb[0] = new PCB(0);
-	pcb[0]->SetFileName("./test/scheduler");
 	pcb[0]->parentID = -1;
 }
 
@@ -32,7 +28,8 @@ PTable::~PTable()
     if( bm != 0 )
 	delete bm;
     
-    For(i,0,psize){
+	int i;
+	for (i = 0; i < psize; i++) {
 		if(pcb[i] != 0)
 			delete pcb[i];
     }
@@ -43,9 +40,7 @@ PTable::~PTable()
 
 int PTable::ExecUpdate(char* name)
 {
-
-
-        //Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
+	//Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
 	bmsem->P();
 	
 	// Kiểm tra tính hợp lệ của chương trình “name”.
@@ -80,7 +75,7 @@ int PTable::ExecUpdate(char* name)
 	pcb[index]->SetFileName(name);
 
 	// parrentID là processID của currentThread
-    	pcb[index]->parentID = currentThread->processID;
+	pcb[index]->parentID = currentThread->processID;
 
 	
 	// Gọi thực thi phương thức Exec của lớp PCB.
@@ -141,10 +136,6 @@ int PTable::ExitUpdate(int exitcode)
 		return -1;
 	}
 
-	
-
-
-	
 	// Ngược lại gọi SetExitCode để đặt exitcode cho tiến trình gọi.
 	pcb[id]->SetExitCode(exitcode);
 	pcb[pcb[id]->parentID]->DecNumWait();

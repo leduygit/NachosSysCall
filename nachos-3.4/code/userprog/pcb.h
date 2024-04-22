@@ -1,8 +1,6 @@
 // pcb.h 
 //  Process Control Block
 //	Save all information to control the process
-// All rights reserved.
-
 
 #ifndef PCB_H
 #define PCB_H

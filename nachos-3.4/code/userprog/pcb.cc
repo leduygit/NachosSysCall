@@ -1,14 +1,10 @@
 // pcb.cc, "Process Control Block"
-// All rights reserved.
-
-
 
 #include "pcb.h"
 #include "utility.h"
 #include "system.h"
 #include "thread.h"
 #include "addrspace.h"
-
 
 extern void StartProcess_2(int id);
 
@@ -28,7 +24,6 @@ PCB::PCB(int id)
 }
 PCB::~PCB()
 {
-	
 	if(joinsem != NULL)
 		delete this->joinsem;
 	if(exitsem != NULL)
@@ -119,5 +114,4 @@ int PCB::Exec(char* filename, int id)
     	multex->V();
 	// Trả về id.
 	return id;
-
 }
